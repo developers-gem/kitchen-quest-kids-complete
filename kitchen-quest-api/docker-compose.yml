@@ -1,0 +1,50 @@
+# Local development stack: API + MongoDB + Redis. Not used by the test
+# suite itself (tests run against in-memory fakes, see tests/mocks/ and
+# jest.config.js) -- this is for running the real server against real
+# dependencies, and as a reference for what production infrastructure
+# this API expects.
+services:
+  api:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      MONGO_URI: mongodb://mongo:27017/kitchen_quest_dev
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_SECRET: dev-access-secret-change-me-please
+      JWT_REFRESH_SECRET: dev-refresh-secret-change-me-please
+      PARENTAL_GATE_SECRET: dev-parental-gate-secret-change-me
+      CORS_ORIGIN: http://localhost:5173
+      FRONTEND_URL: http://localhost:5173
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo_data:

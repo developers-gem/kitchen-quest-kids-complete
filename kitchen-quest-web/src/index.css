@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens matching the original Kitchen Quest Kids prototype
+ * (Lovable-generated Tailwind v4 app) exactly, so this rebuild's visual
+ * language is a continuation, not a redesign. Reduced-motion support is
+ * global here rather than sprinkled per-component.
+ */
+@theme {
+  --color-primary: #ff6b4a;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #ffc75f;
+  --color-accent: #7bc86c;
+  --color-foreground: #2b2418;
+  --color-background: #fbf6e9;
+  --color-surface: #ffffff;
+  --color-danger: #e0524a;
+
+  --font-sans: "Nunito", system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Large, obviously-visible focus rings everywhere -- accessibility
+   requirement, not optional polish. Never remove outline without
+   replacing it with something at least as visible. */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
