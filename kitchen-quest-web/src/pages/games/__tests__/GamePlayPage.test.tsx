@@ -101,8 +101,17 @@ describe("Game play flow (quiz)", () => {
     expect(gamesApi.startGameSession).not.toHaveBeenCalled();
   });
 
-  it("shows an honest 'not playable yet' message for unsupported game types, without starting a session", async () => {
-    vi.mocked(gamesApi.getGameBySlug).mockResolvedValue({ ...baseGameDetail, gameType: "sorting", unlocked: true });
+  it("shows an honest 'not playable yet' message for a gameType the backend might add in the future, without starting a session", async () => {
+    // All 9 of the backend's current GAME_TYPES are supported now -- this
+    // exercises the defensive fallback for a *hypothetical* 10th
+    // gameType added to the backend before its player exists here. Cast
+    // needed since "future-type" isn't a real member of the GameType
+    // union this app currently knows about.
+    vi.mocked(gamesApi.getGameBySlug).mockResolvedValue({
+      ...baseGameDetail,
+      gameType: "future-type" as typeof baseGameDetail.gameType,
+      unlocked: true,
+    });
 
     renderPage();
 
@@ -262,5 +271,68 @@ describe("Game play flow (quiz)", () => {
     // Still only 1 of 2 connected -- finish must stay disabled.
     expect(screen.getByRole("button", { name: /match all 2 to finish/i })).toBeDisabled();
     expect(gamesApi.completeGameSession).not.toHaveBeenCalled();
+  });
+
+  it("plays a full sorting game end-to-end: start -> sort all cards -> finish -> results", async () => {
+    const user = userEvent.setup();
+    vi.mocked(gamesApi.getGameBySlug).mockResolvedValue({ ...baseGameDetail, gameType: "sorting", unlocked: true });
+    vi.mocked(gamesApi.startGameSession).mockResolvedValue({
+      session: { _id: "session-4", status: "inProgress", startedAt: new Date().toISOString() },
+      game: {
+        _id: "game-1",
+        title: "Big Apple Crunch",
+        gameType: "sorting",
+        maxStars: 3,
+        configuration: {
+          bins: [
+            { id: "bin-fruit", label: "Fruits" },
+            { id: "bin-veg", label: "Vegetables" },
+          ],
+          items: [
+            { id: "item-1", label: "Apple" },
+            { id: "item-2", label: "Carrot" },
+          ],
+        },
+      },
+    });
+    vi.mocked(gamesApi.completeGameSession).mockResolvedValue({
+      session: {
+        _id: "session-4",
+        status: "completed",
+        score: 2,
+        scoreTotal: 2,
+        stars: 3,
+        xpEarned: 20,
+        completionRank: 1,
+        isFirstCompletion: true,
+        dailyCapReached: false,
+      },
+      child: { totalXP: 20, currentLevel: 1, currentStreak: 1, streakIncreased: false },
+      newlyEarnedAchievements: [],
+      dailyChallenge: { matched: false, justCompleted: false, xpAwarded: 0 },
+    });
+
+    renderPage();
+
+    await waitFor(() => expect(screen.getByRole("button", { name: /^start$/i })).toBeInTheDocument());
+    await user.click(screen.getByRole("button", { name: /^start$/i }));
+
+    await waitFor(() => expect(screen.getByText("Apple")).toBeInTheDocument());
+    await user.click(screen.getByText("Apple"));
+    await user.click(screen.getByLabelText("Place in Fruits"));
+    await user.click(screen.getByText("Carrot"));
+    await user.click(screen.getByLabelText("Place in Vegetables"));
+
+    await user.click(screen.getByRole("button", { name: /finish/i }));
+
+    expect(gamesApi.completeGameSession).toHaveBeenCalledWith("game-1", "session-4", mia._id, {
+      placements: expect.arrayContaining([
+        { itemId: "item-1", binId: "bin-fruit" },
+        { itemId: "item-2", binId: "bin-veg" },
+      ]),
+    });
+
+    await waitFor(() => expect(screen.getByText(/great job/i)).toBeInTheDocument());
+    expect(screen.getByText("+20 XP")).toBeInTheDocument();
   });
 });

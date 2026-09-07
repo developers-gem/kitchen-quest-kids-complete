@@ -28,14 +28,11 @@ function createApp() {
   // CORS — restricted to the configured web/mobile origin(s); credentials
   // enabled since the web client relies on the httpOnly refresh cookie.
   app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://kitchen-quest-kids-complete.vercel.app",
-    ],
-    credentials: true,
-  })
-);
+    cors({
+      origin: env.CORS_ORIGIN.split(",").map((o) => o.trim()),
+      credentials: true,
+    })
+  );
 
   app.use(express.json({ limit: "1mb" }));
   app.use(express.urlencoded({ extended: true }));

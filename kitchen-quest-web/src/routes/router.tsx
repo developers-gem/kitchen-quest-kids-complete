@@ -55,12 +55,9 @@ import { AdminAvatarCosmeticEditorPage } from "../admin/pages/avatarCosmetics/Ad
  * MILESTONE: every child/parent-facing route that used to be a
  * ComingSoonPage placeholder (Flavor Hub, Games, Recipes, Grocery, the
  * full Parent Dashboard) is now a real, tested page against backend
- * contracts that were already complete. The one remaining, explicitly
- * honest gap: only "quiz" and "matching" have real interactive players;
- * the other 7 (sorting, memory, sequence, dragAndDrop, maze,
- * ingredientBuilder, timedChallenge) show a "not playable here yet"
- * message inside GamePlayPage rather than a fake game -- see that file's
- * doc comment.
+ * contracts that were already complete. All 9 gameTypes now have a real
+ * interactive player -- see GamePlayPage.tsx's own doc comment for the
+ * build order.
  */
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },

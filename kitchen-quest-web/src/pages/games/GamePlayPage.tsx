@@ -9,21 +9,36 @@ import * as gamesApi from "../../api/games";
 import { GameFlow } from "./GameFlow";
 import { QuizPlayer } from "./QuizPlayer";
 import { MatchingPlayer, type MatchingConfig } from "./MatchingPlayer";
+import { SortingPlayer, type SortingConfig } from "./SortingPlayer";
+import { SequencePlayer, type SequenceConfig } from "./SequencePlayer";
+import { MemoryPlayer, type MemoryConfig } from "./MemoryPlayer";
+import { DragAndDropPlayer, type DragAndDropConfig } from "./DragAndDropPlayer";
+import { IngredientBuilderPlayer, type IngredientBuilderConfig } from "./IngredientBuilderPlayer";
+import { TimedChallengePlayer, type TimedChallengeConfig } from "./TimedChallengePlayer";
+import { MazePlayer, type MazeConfig } from "./MazePlayer";
 
 /**
- * FLAGSHIP + HONEST GAPS, same pattern as the admin panel's Games editor:
- * "quiz" and "matching" are the two gameTypes with a real, complete,
- * interactive player built here. The other 7 (sorting, memory, sequence,
- * dragAndDrop, maze, ingredientBuilder, timedChallenge) each need their
- * own bespoke interaction pattern -- a drag surface, a memory-flip grid,
- * a maze renderer -- which is real, substantial UI work per type, not
- * something to fake with a shared generic component. Rather than build
- * one properly and silently stub the rest with something that *looks*
- * like a game, unsupported types show an honest "not playable here yet"
- * message and never start a session (so a child's gamesPlayed count
- * isn't incremented for a game they were never actually able to play).
+ * All 9 gameTypes now have a real, interactive player -- this file's
+ * long-standing "flagship + honest gaps" doc comment is retired as of
+ * this pass. Kept as a code comment for history: quiz and matching were
+ * built first, then sorting, then this pass added sequence, memory,
+ * dragAndDrop, ingredientBuilder, timedChallenge, and maze in one sweep.
+ * Every player still follows the same rule established from the start:
+ * never call startGameSession until we know which player to render, so
+ * an unrecognized/future gameType still can't silently increment a
+ * child's gamesPlayed stat for a game they couldn't actually play.
  */
-const SUPPORTED_GAME_TYPES = ["quiz", "matching"] as const;
+const SUPPORTED_GAME_TYPES = [
+  "quiz",
+  "matching",
+  "sorting",
+  "sequence",
+  "memory",
+  "dragAndDrop",
+  "ingredientBuilder",
+  "timedChallenge",
+  "maze",
+] as const;
 
 interface QuizConfig {
   questions: { id: string; prompt: string; options: { id: string; text: string }[] }[];
@@ -62,11 +77,17 @@ export function GamePlayPage() {
   const isSupported = (SUPPORTED_GAME_TYPES as readonly string[]).includes(data.gameType);
 
   if (!isSupported) {
+    // Defensive fallback only -- every gameType the backend's own
+    // GAME_TYPES enum defines is now supported above. This still guards
+    // against a *future* 10th gameType being added to the backend
+    // before its player is built here, so that scenario degrades to an
+    // honest message instead of a runtime crash reaching an unmatched
+    // branch below.
     return (
       <EmptyState
         icon="🚧"
         title={`${data.title} isn't playable here yet`}
-        description={`"${data.gameType}" games need their own interactive experience, coming in a future update. Quiz and matching games are ready to play now!`}
+        description={`"${data.gameType}" games need their own interactive experience, coming in a future update.`}
         action={
           <Link to="/games" className="inline-block min-h-11 rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground">
             Back to Games
@@ -78,27 +99,91 @@ export function GamePlayPage() {
 
   const shared = { gameId: data._id, title: data.title, childId: activeChild._id, onExit: () => navigate("/games") };
 
-  if (data.gameType === "quiz") {
-    return (
-      <GameFlow<QuizConfig>
-        {...shared}
-        instructions="Answer every question to earn stars and XP!"
-        parseConfig={(raw) => raw as QuizConfig}
-        renderPlayer={(config, onFinish) => (
-          <QuizPlayer questions={config.questions} onFinish={(answers) => onFinish({ answers })} />
-        )}
-      />
-    );
+  switch (data.gameType) {
+    case "quiz":
+      return (
+        <GameFlow<QuizConfig>
+          {...shared}
+          instructions="Answer every question to earn stars and XP!"
+          parseConfig={(raw) => raw as QuizConfig}
+          renderPlayer={(config, onFinish) => (
+            <QuizPlayer questions={config.questions} onFinish={(answers) => onFinish({ answers })} />
+          )}
+        />
+      );
+    case "matching":
+      return (
+        <GameFlow<MatchingConfig>
+          {...shared}
+          instructions="Match every card on the left with its partner on the right!"
+          parseConfig={(raw) => raw as MatchingConfig}
+          renderPlayer={(config, onFinish) => <MatchingPlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "sorting":
+      return (
+        <GameFlow<SortingConfig>
+          {...shared}
+          instructions="Sort every card into the correct bin!"
+          parseConfig={(raw) => raw as SortingConfig}
+          renderPlayer={(config, onFinish) => <SortingPlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "sequence":
+      return (
+        <GameFlow<SequenceConfig>
+          {...shared}
+          instructions="Put the steps in the right order!"
+          parseConfig={(raw) => raw as SequenceConfig}
+          renderPlayer={(config, onFinish) => <SequencePlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "memory":
+      return (
+        <GameFlow<MemoryConfig>
+          {...shared}
+          instructions="Flip two cards at a time to find every matching pair!"
+          parseConfig={(raw) => raw as MemoryConfig}
+          renderPlayer={(config, onFinish) => <MemoryPlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "dragAndDrop":
+      return (
+        <GameFlow<DragAndDropConfig>
+          {...shared}
+          instructions="Place every card in the right spot!"
+          parseConfig={(raw) => raw as DragAndDropConfig}
+          renderPlayer={(config, onFinish) => <DragAndDropPlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "ingredientBuilder":
+      return (
+        <GameFlow<IngredientBuilderConfig>
+          {...shared}
+          instructions="Pick out every ingredient that belongs!"
+          parseConfig={(raw) => raw as IngredientBuilderConfig}
+          renderPlayer={(config, onFinish) => <IngredientBuilderPlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "timedChallenge":
+      return (
+        <GameFlow<TimedChallengeConfig>
+          {...shared}
+          instructions="Tap the right ones before time runs out!"
+          parseConfig={(raw) => raw as TimedChallengeConfig}
+          renderPlayer={(config, onFinish) => <TimedChallengePlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    case "maze":
+      return (
+        <GameFlow<MazeConfig>
+          {...shared}
+          instructions="Explore the maze, collect the healthy foods, and find the exit!"
+          parseConfig={(raw) => raw as MazeConfig}
+          renderPlayer={(config, onFinish) => <MazePlayer config={config} onFinish={(outcome) => onFinish(outcome)} />}
+        />
+      );
+    default:
+      return null;
   }
-
-  return (
-    <GameFlow<MatchingConfig>
-      {...shared}
-      instructions="Match every card on the left with its partner on the right!"
-      parseConfig={(raw) => raw as MatchingConfig}
-      renderPlayer={(config, onFinish) => (
-        <MatchingPlayer config={config} onFinish={(outcome) => onFinish(outcome)} />
-      )}
-    />
-  );
 }

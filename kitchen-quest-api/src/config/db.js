@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
 const env = require("./env");
-
-mongoose.set("strictQuery", true);
 const dns = require("dns");
-dns.setServers(["1.1.1.1","8.8.8.8"]); // Set DNS servers to Cloudflare and Google  
+
+dns.setServers(["1.1.1.1", "8.8.8.8"]); // Use Cloudflare and Google DNS servers for better reliability
+mongoose.set("strictQuery", true);
+
 /**
  * FIXED (production readiness audit, finding E1): connectDB() used to
  * make exactly one connection attempt and let the process crash

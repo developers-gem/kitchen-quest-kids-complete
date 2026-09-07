@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
-    "test": "cross-env NODE_ENV=test jest --runInBand"
+    "test": "cross-env NODE_ENV=test jest --runInBand",
+    "seed": "cross-env NODE_ENV=development node src/db/seed/seedAvatars.js && cross-env NODE_ENV=development node src/db/seed/seedGames.js && cross-env NODE_ENV=development node src/db/seed/seedRecipes.js && cross-env NODE_ENV=development node src/db/seed/seedAchievements.js"
   },
   "dependencies": {
     "@sentry/node": "^10.73.0",
@@ -23,7 +24,6 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.6.0",
     "morgan": "^1.10.0",
-    "nodemailer": "^10.0.0",
     "rate-limit-redis": "^4.2.1",
     "zod": "^3.23.8"
   },

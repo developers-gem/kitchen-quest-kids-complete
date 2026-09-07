@@ -7,7 +7,7 @@ design docs produced earlier in this project.
 ## Running it for real
 
 ```bash
-cp .env .env      # fill in real secrets + a real MONGO_URI
+cp .env.example .env      # fill in real secrets + a real MONGO_URI
 npm install
 npm run dev                # starts on PORT (default 4000)
 ```
