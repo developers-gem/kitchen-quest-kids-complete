@@ -16,18 +16,32 @@ export function LoginPage() {
   const redirectTo = (location.state as { from?: string } | null)?.from ?? "/dashboard";
 
   async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-    try {
-      await login(email, password);
-      navigate(redirectTo, { replace: true });
-    } catch (err) {
-      setError(getErrorMessage(err, "Couldn't log in with that email and password."));
-    } finally {
-      setSubmitting(false);
-    }
+  e.preventDefault();
+  setError(null);
+
+  const cleanEmail = email.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!cleanEmail || !emailRegex.test(cleanEmail)) {
+    setError("Please enter a valid email address.");
+    return;
   }
+
+  if (!password) {
+    setError("Password is required.");
+    return;
+  }
+
+  setSubmitting(true);
+  try {
+    await login(cleanEmail, password);
+    navigate(redirectTo, { replace: true });
+  } catch (err) {
+    setError(getErrorMessage(err, "Couldn't log in with that email and password."));
+  } finally {
+    setSubmitting(false);
+  }
+}
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
