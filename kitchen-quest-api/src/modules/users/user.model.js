@@ -46,7 +46,7 @@ const UserSchema = new Schema(
     timezone: { type: String, default: "UTC" },
     locale: { type: String, default: "en-US" },
     notificationPreferences: { type: [NotificationPreferenceSchema], default: [] },
-    organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: true, index: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: "Organization", required: false, index: true,default: null },
     lastLoginAt: { type: Date },
     deletedAt: { type: Date, default: null },
   },
