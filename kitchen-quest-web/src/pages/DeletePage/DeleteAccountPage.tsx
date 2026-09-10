@@ -24,6 +24,7 @@ export function DeleteAccountPage() {
     setLoading(true);
     setErrorMessage(null);
     setStatusMessage(null);
+    setEmail("")
 
     // In dev: Vite proxies /api/v1 to Render (bypassing CORS)
     // In prod: uses full VITE_API_BASE_URL if configured, otherwise falls back to relative path
@@ -85,18 +86,7 @@ export function DeleteAccountPage() {
           </div>
         </div>
 
-        {/* Informational Consequences Banner */}
-        <div className="bg-rose-500/10 border border-rose-500/20 rounded-2xl p-4 mb-6">
-          <h2 className="text-sm font-bold text-rose-600 mb-2 flex items-center gap-1.5">
-            <span>🛑</span> What happens when you delete your account:
-          </h2>
-          <ul className="list-disc pl-5 space-y-1 text-xs text-rose-700 dark:text-rose-400">
-            <li>All associated child chef profiles will be permanently removed.</li>
-            <li>All earned XP, culinary streaks, badges, and avatars will be wiped.</li>
-            <li>Saved grocery checklists and completed recipe logs will be purged.</li>
-            <li>Live database records are detached immediately upon request.</li>
-          </ul>
-        </div>
+        
 
         {/* Feedback Messages */}
         {statusMessage && (
