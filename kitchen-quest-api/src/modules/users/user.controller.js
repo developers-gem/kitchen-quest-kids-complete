@@ -17,4 +17,19 @@ const deleteMe = asyncHandler(async (req, res) => {
   sendSuccess(res, { statusCode: 200, message: "Account deletion initiated" });
 });
 
-module.exports = { getMe, updateMe, deleteMe };
+// const deleteAccount = asyncHandler(async (req, res) => {   // this moved to the app.js file to handle deletion by email without requiring authentication
+//   const { email } = req.body;
+
+//   if (!email) {
+//     return res.status(400).json({
+//       success: false,
+//       message: "Email is required to delete the account."
+//     });
+//   }
+
+//   // Delete directly by email without checking req.user
+//   await userService.deleteAccountByEmail(email.toLowerCase().trim());
+
+//   sendSuccess(res, { statusCode: 200, message: "Account successfully deleted" });
+// });
+module.exports = { getMe, updateMe, deleteMe, deleteAccount };

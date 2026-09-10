@@ -186,6 +186,7 @@ import { AdminDailyChallengesListPage } from "../admin/pages/dailyChallenges/Adm
 import { AdminDailyChallengeEditorPage } from "../admin/pages/dailyChallenges/AdminDailyChallengeEditorPage";
 import { AdminAvatarCosmeticsListPage } from "../admin/pages/avatarCosmetics/AdminAvatarCosmeticsListPage";
 import { AdminAvatarCosmeticEditorPage } from "../admin/pages/avatarCosmetics/AdminAvatarCosmeticEditorPage";
+import { DeleteAccountPage } from "../pages/DeletePage/DeleteAccountPage";
 
 /**
  * Route structure:
@@ -204,6 +205,8 @@ export const router = createBrowserRouter([
   { path: "/verify-email", element: <VerifyEmailPage /> },
   { path: "/privacy", element: <PrivacyPolicyPage /> },
   { path: "/privacy-policy", element: <Navigate to="/privacy" replace /> },
+  {path:"delete-account", element: <DeleteAccountPage />},
+  
   {
     element: <RequireAuth />,
     children: [
