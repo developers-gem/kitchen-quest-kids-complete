@@ -53,5 +53,4 @@ module.exports = {
   getById,
   updateProfile,
   softDeleteAccount,
-  deleteAccountByEmail,
 };

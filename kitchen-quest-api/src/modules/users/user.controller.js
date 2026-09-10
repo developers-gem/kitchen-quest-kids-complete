@@ -32,4 +32,4 @@ const deleteMe = asyncHandler(async (req, res) => {
 
 //   sendSuccess(res, { statusCode: 200, message: "Account successfully deleted" });
 // });
-module.exports = { getMe, updateMe, deleteMe, deleteAccount };
+module.exports = { getMe, updateMe, deleteMe };
